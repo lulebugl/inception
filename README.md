@@ -152,3 +152,64 @@ Tip: Start by making the DB healthy, then bring up php-fpm with a working `wp-co
 ### Persistence
 - [ ] After VM reboot and `docker compose up`, WordPress and MariaDB remain configured
 - [ ] Prior content and changes persist (comments, edited pages)
+
+## Where to start
+* Scaffold the skeleton
+	* Create srcs/docker-compose.yml with one network, two bind-mount volumes under /home/login/data, and three empty services.
+	* Add a minimal Makefile with build, up, down, re.
+
+1) MariaDB: image, volume, init DB, create WP DB + user, healthcheck.
+2) WordPress php-fpm: install PHP-FPM + extensions, put WordPress into the site volume, generate wp-config.php from env, 	php-fpm -F, healthcheck.
+3) NGINX: TLS certs mount, TLS-only port 443, fastcgi to php-fpm, no port 80 exposure, healthcheck.
+	* Wire env and secrets
+		* .env for non-sensitive; secrets files (bind-mounted) for passwords.
+
+## Documentation
+
+### Docker and Compose
+- [Dockerfile reference](https://docs.docker.com/reference/dockerfile/)
+- [Dockerfile best practices](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)
+- [Compose file reference](https://docs.docker.com/compose/compose-file/)
+- [HEALTHCHECK (Dockerfile)](https://docs.docker.com/reference/dockerfile/#healthcheck) · [Compose healthcheck](https://docs.docker.com/compose/compose-file/05-services/#healthcheck)
+- [Environment variables in Compose](https://docs.docker.com/compose/environment-variables/set-environment-variables/)
+- [Secrets in Compose](https://docs.docker.com/compose/use-secrets/)
+
+### NGINX TLS and FastCGI
+- [Configuring HTTPS servers](https://nginx.org/en/docs/http/configuring_https_servers.html)
+- [FastCGI module (php-fpm)](https://nginx.org/en/docs/http/ngx_http_fastcgi_module.html)
+- [Mozilla SSL/TLS config generator](https://ssl-config.mozilla.org/)
+
+### PHP-FPM and WordPress
+- [php-fpm configuration](https://www.php.net/manual/en/install.fpm.configuration.php)
+- [WordPress requirements](https://wordpress.org/support/article/requirements/)
+- [WP-CLI](https://wp-cli.org/)
+- [Editing wp-config.php](https://wordpress.org/documentation/article/editing-wp-config-php/)
+
+### MariaDB
+- [Initialize data directory](https://mariadb.com/kb/en/mysql_install_db/)
+- [mysqld options](https://mariadb.com/kb/en/mysqld-options/)
+- [GRANT privileges](https://mariadb.com/kb/en/grant/)
+
+### TLS tools and local certs
+- [mkcert](https://github.com/FiloSottile/mkcert)
+
+### Useful commands
+
+```bash
+# Verify TLS protocols
+openssl s_client -connect login.42.fr:443 -tls1_2 | head -n 20
+openssl s_client -connect login.42.fr:443 -tls1_3 | head -n 20
+
+# Check endpoints
+curl -vkI https://login.42.fr
+curl -v http://login.42.fr  # should fail
+
+# Compose / containers
+docker compose ps
+docker compose logs -f | cat
+
+# Network / volumes
+docker network ls
+docker volume ls
+docker volume inspect <volume-name>
+```
