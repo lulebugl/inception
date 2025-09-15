@@ -213,3 +213,4 @@ docker network ls
 docker volume ls
 docker volume inspect <volume-name>
 ```
+
