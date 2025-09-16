@@ -1,6 +1,40 @@
 services:
-  website:
-    image: nginx
-    ports:
-      - "8081:80"
+  mariadb:
+    build:
+      context: ./requirements/mariadb
+    image: mariadb:local
+    container_name: mariadb
     restart: always
+    environment:
+      - MARIADB_DATABASE=${MYSQL_DATABASE}
+      - MARIADB_USER=${MYSQL_USER}
+    secrets:
+      - db_password
+      - db_root_password
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin --protocol=socket --socket=/run/mysqld/mysqld.sock -uroot -p$$(tr -d '\\r\\n' </run/secrets/db_root_password) ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks:
+      - inception
+
+volumes:
+  mariadb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${LOGIN}/data/mariadb
+
+secrets:
+  db_password:
+    file: ../secrets/db_password.txt
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+
+networks:
+  inception:
+    driver: bridge

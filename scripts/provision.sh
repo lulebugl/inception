@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
-  : # non-root is fine; we will use sudo where needed
-fi
-
 LOGIN="llebugle"
+echo "export LOGIN=${LOGIN}" >> ~/.bashrc
 DOMAIN="llebugle.42.fr"
+echo "export DOMAIN=${DOMAIN}" >> ~/.bashrc
 DATA_ROOT="/home/${LOGIN}/data"
+echo "export DATA_ROOT=${DATA_ROOT}" >> ~/.bashrc
+source ~/.bashrc
 
 echo "[provision] LOGIN=${LOGIN} DOMAIN=${DOMAIN} DATA_ROOT=${DATA_ROOT}"
 
 ensure_packages() {
   if command -v apt-get >/dev/null 2>&1; then
     sudo apt-get update -y
-    sudo apt-get install -y ca-certificates curl gnupg lsb-release openssl
+    sudo apt-get install -y ca-certificates curl gnupg lsb-release openssl make vim git
   fi
 }
 

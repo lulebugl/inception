@@ -5,7 +5,6 @@ A Docker-Compose based mini-infrastructure with three services: NGINX (TLS-only)
 Replace `login` with your 42 login everywhere (e.g., volumes path `/home/login/data`, domain `login.42.fr`).
 
 ## Global TODO
-- [ ] Choose base OS for all images: **Alpine** or **Debian** (penultimate stable only)
 - [ ] Create a dedicated Docker network in `docker-compose.yml` (no host network, no links)
 - [ ] Ensure each service image name matches its service name
 - [ ] Avoid the `latest` tag everywhere
@@ -41,14 +40,13 @@ Replace `login` with your 42 login everywhere (e.g., volumes path `/home/login/d
 - [ ] Add `healthcheck` (e.g., `php-fpm` ping or script)
 
 ### Service: MariaDB (DB only)
-- [ ] Create `srcs/requirements/mariadb/Dockerfile` (Alpine/Debian penultimate stable)
-- [ ] Install MariaDB server; run `mysqld` in foreground as PID 1
-- [ ] Initialize database on first run in the DB volume
-- [ ] Create WordPress database
-- [ ] Create a dedicated DB user for WordPress with least privileges needed on the WP database
-- [ ] Use secrets for root password and user passwords; no passwords in Dockerfiles
-- [ ] Restrict bind/address to container only; no public exposure
-- [ ] Add `healthcheck` (e.g., `mysqladmin ping`)
+- [x] Install MariaDB server; run `mysqld` in foreground as PID 1
+- [x] Initialize database on first run in the DB volume
+- [\] Create WordPress database
+- [\] Create a dedicated DB user for WordPress with least privileges needed on the WP database
+- [x] Use secrets for root password and user passwords; no passwords in Dockerfiles
+- [\] Restrict bind/address to container only; no public exposure
+- [x] Add `healthcheck` (e.g., `mysqladmin ping`)
 
 ## Compose, Network, and Orchestration
 - [ ] Write `srcs/docker-compose.yml` using Compose v3+
@@ -62,9 +60,9 @@ Replace `login` with your 42 login everywhere (e.g., volumes path `/home/login/d
   - [ ] Certs volume/bind → NGINX for TLS certs
 
 ## Volumes and Data
-- [ ] Create host directories for volumes at `/home/login/data`:
-  - [ ] `/home/login/data/mariadb` (DB data)
-  - [ ] `/home/login/data/wordpress` (site files)
+- [\] Create host directories for volumes at `/home/login/data`:
+  - [x] `/home/login/data/mariadb` (DB data)
+  - [x] `/home/login/data/wordpress` (site files)
   - [ ] `/home/login/data/certs` (TLS cert/key)
 - [ ] Ensure proper permissions and ownership for each volume dir
 - [ ] Add volumes to `docker-compose.yml` with bind mounts to the above paths
@@ -81,15 +79,6 @@ Replace `login` with your 42 login everywhere (e.g., volumes path `/home/login/d
 - [ ] Store confidential data in secrets (e.g., `db_root_password`, `db_password`, WP admin password)
 - [ ] Reference secrets in Compose and pass to containers securely
 - [ ] Ensure Dockerfiles do not `ARG` or `ENV` any sensitive secrets
-
-## Makefile
-- [ ] Implement `Makefile` targets that call Docker Compose:
-  - [ ] `make build` → build all custom images via Compose (no pulling prebuilt images)
-  - [ ] `make up` → start the stack in detached mode
-  - [ ] `make down` → stop and remove containers, networks (keep volumes)
-  - [ ] `make clean` → remove images/volumes if required by project policy
-  - [ ] `make re` → clean + rebuild + up
-- [ ] Ensure Make targets call `docker-compose -f srcs/docker-compose.yml ...`
 
 ## VM/Host Setup
 - [ ] Ensure everything runs inside the required virtual machine environment
@@ -145,7 +134,7 @@ Tip: Start by making the DB healthy, then bring up php-fpm with a working `wp-co
 - [ ] Page edit from dashboard reflects on the site
 
 ### MariaDB and its volume
-- [ ] Container exists (`docker compose ps`); Dockerfile contains no NGINX
+- [x] Container exists (`docker compose ps`); Dockerfile contains no NGINX
 - [ ] DB volume mapped under `/home/login/data/mariadb`
 - [ ] Able to explain and perform DB login; database not empty (WP tables exist)
 
