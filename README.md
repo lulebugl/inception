@@ -14,6 +14,7 @@ Replace `login` with your 42 login everywhere (e.g., volumes path `/home/login/d
 - [ ] Use Docker secrets (or Compose secrets) for confidential values
 - [ ] Ensure no infinite loops or `tail -f`, `sleep`, `bash`-as-PID1, or `while true`
 - [ ] Verify proper PID 1 handling in each container (use native daemons or correct foreground mode)
+- [ ] Add .env to .gitignore and changes the value before finishing the project
 
 ### Service: NGINX (sole entry point on 443 with TLSv1.2/1.3)
 - [ ] Create `srcs/requirements/nginx/Dockerfile` (Alpine/Debian penultimate stable)
