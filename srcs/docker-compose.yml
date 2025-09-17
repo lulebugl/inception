@@ -1,4 +1,27 @@
 services:
+  nginx:
+    build:
+      context: ./requirements/nginx
+    image: nginx:local
+    container_name: nginx
+    restart: always
+    depends_on:
+      wordpress:
+        condition: service_healthy
+    ports:
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN_NAME}
+    volumes:
+      - wordpress_data:/var/www/html:ro
+      - /home/${LOGIN}/data/certs:/etc/nginx/certs:ro
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -kfsS https://127.0.0.1 -I || exit 1"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 12
+    networks:
+      - inception
   mariadb:
     build:
       context: ./requirements/mariadb
@@ -21,7 +44,42 @@ services:
     networks:
       - inception
 
+  wordpress:
+    build:
+      context: ./requirements/wordpress
+    image: wordpress-fpm:local
+    container_name: wordpress
+    restart: always
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      - MARIADB_DATABASE=${MYSQL_DATABASE}
+      - MARIADB_USER=${MYSQL_USER}
+      - WP_URL=https://${DOMAIN}
+      - WP_TITLE=Inception
+      - WP_ADMIN_USER=${WP_ADMIN_USER}
+      - WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL}
+    secrets:
+      - db_password
+      - wp_admin_password
+    volumes:
+      - wordpress_data:/var/www/html
+    healthcheck:
+      test: ["CMD-SHELL", "SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000 | grep -q pong"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks:
+      - inception
+
 volumes:
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${LOGIN}/data/wordpress
   mariadb_data:
     driver: local
     driver_opts:
@@ -34,6 +92,8 @@ secrets:
     file: ../secrets/db_password.txt
   db_root_password:
     file: ../secrets/db_root_password.txt
+  wp_admin_password:
+    file: ../secrets/wp_admin_password.txt
 
 networks:
   inception:

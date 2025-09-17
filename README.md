@@ -4,6 +4,9 @@ A Docker-Compose based mini-infrastructure with three services: NGINX (TLS-only)
 
 Replace `login` with your 42 login everywhere (e.g., volumes path `/home/login/data`, domain `login.42.fr`).
 
+## Next
+* create config file for php-fpm and wordpress
+
 ## Global TODO
 - [ ] Create a dedicated Docker network in `docker-compose.yml` (no host network, no links)
 - [ ] Ensure each service image name matches its service name
@@ -43,8 +46,8 @@ Replace `login` with your 42 login everywhere (e.g., volumes path `/home/login/d
 ### Service: MariaDB (DB only)
 - [x] Install MariaDB server; run `mysqld` in foreground as PID 1
 - [x] Initialize database on first run in the DB volume
-- [\] Create WordPress database
-- [\] Create a dedicated DB user for WordPress with least privileges needed on the WP database
+- [x] Create WordPress database
+- [x] Create a dedicated DB user for WordPress with least privileges needed on the WP database
 - [x] Use secrets for root password and user passwords; no passwords in Dockerfiles
 - [\] Restrict bind/address to container only; no public exposure
 - [x] Add `healthcheck` (e.g., `mysqladmin ping`)
@@ -143,17 +146,6 @@ Tip: Start by making the DB healthy, then bring up php-fpm with a working `wp-co
 - [ ] After VM reboot and `docker compose up`, WordPress and MariaDB remain configured
 - [ ] Prior content and changes persist (comments, edited pages)
 
-## Where to start
-* Scaffold the skeleton
-	* Create srcs/docker-compose.yml with one network, two bind-mount volumes under /home/login/data, and three empty services.
-	* Add a minimal Makefile with build, up, down, re.
-
-1) MariaDB: image, volume, init DB, create WP DB + user, healthcheck.
-2) WordPress php-fpm: install PHP-FPM + extensions, put WordPress into the site volume, generate wp-config.php from env, 	php-fpm -F, healthcheck.
-3) NGINX: TLS certs mount, TLS-only port 443, fastcgi to php-fpm, no port 80 exposure, healthcheck.
-	* Wire env and secrets
-		* .env for non-sensitive; secrets files (bind-mounted) for passwords.
-
 ## Documentation
 
 ### Docker and Compose
@@ -202,5 +194,7 @@ docker compose logs -f | cat
 docker network ls
 docker volume ls
 docker volume inspect <volume-name>
-```
 
+# to debug container
+docker compose -f srcs/docker-compose.yml run --rm --no-deps --entrypoint bash service
+```
