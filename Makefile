@@ -4,7 +4,7 @@ ps:
 down:
 	docker compose -f srcs/docker-compose.yml down
 up:
-	docker compose -f srcs/docker-compose.yml up -d
+	docker compose -f srcs/docker-compose.yml up $(service) -d
 build:
 	docker compose -f srcs/docker-compose.yml build
 clean:
@@ -13,6 +13,9 @@ re:
 	make clean
 	make build
 	make up
+
+logs: 
+	docker compose -f srcs/docker-compose.yml logs $(service) | tail -n 100
 
 #utils
 provision:

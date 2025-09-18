@@ -1,62 +1,74 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "${MARIADB_DATABASE:=wordpress}"
-: "${MARIADB_USER:=wp_user}"
-: "${WP_URL:=https://login.42.fr}"
-: "${WP_TITLE:=Inception}"
-: "${WP_ADMIN_USER:=owner}"
-: "${WP_ADMIN_EMAIL:=owner@example.com}"
-
 read_secret() { tr -d '\r\n' < "$1" 2>/dev/null || true; }
-DB_PASS="$(read_secret /run/secrets/db_password)"
 
+DB_PASS="$(read_secret /run/secrets/db_password)"
 if [[ -z "$DB_PASS" ]]; then
   echo "[wordpress] db password missing in /run/secrets/db_password" >&2
   exit 1
 fi
 
+mkdir -p /var/www/html
+cd /var/www/html
+
+if ! command -v wp >/dev/null 2>&1; then
+  curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /usr/local/bin/wp
+  chmod +x /usr/local/bin/wp
+fi
+
+if [[ ! -f wp-config.php ]]; then
+  echo "[wordpress] Downloading WordPress..."
+  wp core download --allow-root
+  cp -f wp-config-sample.php wp-config.php
+  sed -i "s/database_name_here/${MARIADB_DATABASE}/" wp-config.php
+  sed -i "s/username_here/${MARIADB_USER}/" wp-config.php
+  sed -i "s/password_here/${DB_PASS}/" wp-config.php
+  sed -i "s/localhost/mariadb/" wp-config.php
+  wp config shuffle-salts --allow-root
+fi
+
+echo "[wordpress] Waiting for database..."
 for _ in {1..60}; do
-  if mysqladmin -hmariadb -u"$MARIADB_USER" -p"$DB_PASS" ping >/dev/null 2>&1; then
+  if mariadb -hmariadb -u"$MARIADB_USER" -p"$DB_PASS" -e "SELECT 1" >/dev/null 2>&1; then
     break
   fi
   sleep 1
 done
 
-# Download and configure WordPress if missing
-if [[ ! -f wp-config.php ]]; then
-  echo "[wordpress] Bootstrapping WordPress core..."
-  wp core download --allow-root
-  wp config create --allow-root \
-    --dbname="$MARIADB_DATABASE" \
-    --dbuser="$MARIADB_USER" \
-    --dbpass="$DB_PASS" \
-    --dbhost="mariadb:3306"
-fi
-
 # Install site if not installed
 if ! wp core is-installed --allow-root >/dev/null 2>&1; then
   echo "[wordpress] Installing site..."
+  if [[ "${WP_ADMIN_USER}" =~ [Aa]dmin|[Aa]dministrator ]]; then
+        echo "Error: Administrator username cannot contain 'admin', 'Admin', or 'administrator' ..."
+        exit 1
+  fi
+
   WP_ADMIN_PASS=$(read_secret /run/secrets/wp_admin_password)
   if [[ -z "$WP_ADMIN_PASS" ]]; then
-    WP_ADMIN_PASS=$(openssl rand -hex 16)
-    echo "[wordpress] Generated admin password (ephemeral)"
+    echo "[wordpress] admin password missing in /run/secrets/wp_admin_password" >&2
+	exit 1
   fi
+
   wp core install --allow-root \
-    --url="$WP_URL" \
-    --title="$WP_TITLE" \
-    --admin_user="$WP_ADMIN_USER" \
-    --admin_password="$WP_ADMIN_PASS" \
-    --admin_email="$WP_ADMIN_EMAIL"
-  # Create a regular user as required by subject (non-admin)
-  if ! wp user get author --field=ID --allow-root >/dev/null 2>&1; then
-    wp user create author author@example.com --role=author --user_pass="$(openssl rand -hex 12)" --allow-root
+    --url="${WP_URL}" \
+    --title="${WP_TITLE}" \
+    --admin_user="${WP_ADMIN_USER}" \
+    --admin_password="${WP_ADMIN_PASS}" \
+    --admin_email="${WP_ADMIN_EMAIL}" \
+    --skip-email
+
+  # Create a regular user if requested, else create a default author
+  : "${WP_USER:=author}"
+  : "${WP_USER_EMAIL:=author@example.com}"
+  : "${WP_USER_PASSWORD:=}"
+  if ! wp user get "$WP_USER" --field=ID --allow-root >/dev/null 2>&1; then
+    if [[ -z "$WP_USER_PASSWORD" ]]; then WP_USER_PASSWORD=$(openssl rand -hex 12); fi
+    wp user create "$WP_USER" "$WP_USER_EMAIL" --user_pass="$WP_USER_PASSWORD" --role=author --allow-root
   fi
 fi
 
-# ensure PID dir exists and is writable
 install -d -m 755 -o www-data -g www-data /run/php
-PHP_FPM_BIN="$(command -v php-fpm || ls /usr/sbin/php-fpm* 2>/dev/null | head -n1)"
-echo "[wordpress] Starting php-fpm"
-exec "$PHP_FPM_BIN" -F
+echo "[wordpress] Starting php-fpm8.2"
+exec php-fpm8.2 -F
 

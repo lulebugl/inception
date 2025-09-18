@@ -15,11 +15,11 @@ services:
     volumes:
       - wordpress_data:/var/www/html:ro
       - /home/${LOGIN}/data/certs:/etc/nginx/certs:ro
-    # healthcheck:
-    #   test: ["CMD-SHELL", "curl -kfsS https://127.0.0.1 -I || exit 1"]
-    #   interval: 10s
-    #   timeout: 5s
-    #   retries: 12
+    healthcheck:
+      test: ["CMD-SHELL", "curl -kfsS https://127.0.0.1 -I || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     networks:
       - inception
   mariadb:
@@ -56,10 +56,13 @@ services:
     environment:
       - MARIADB_DATABASE=${MYSQL_DATABASE}
       - MARIADB_USER=${MYSQL_USER}
-      - WP_URL=https://${DOMAIN}
-      - WP_TITLE=Inception
+      - WP_URL=https://${DOMAIN_NAME}
+      - WP_TITLE=${WP_TITLE}
       - WP_ADMIN_USER=${WP_ADMIN_USER}
       - WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL}
+      - WP_USER=${WP_USER}
+      - WP_USER_EMAIL=${WP_USER_EMAIL}
+      - WP_USER_PASSWORD=${WP_USER_PWD}
     secrets:
       - db_password
       - wp_admin_password
@@ -75,12 +78,14 @@ services:
 
 volumes:
   wordpress_data:
+    name: wordpress
     driver: local
     driver_opts:
       type: none
       o: bind
       device: /home/${LOGIN}/data/wordpress
   mariadb_data:
+    name: mariadb
     driver: local
     driver_opts:
       type: none

@@ -6,7 +6,6 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        ca-certificates \
        mariadb-server mariadb-client \
-	   # gosu is similar to sudo but for docker
        gosu \
     && rm -rf /var/lib/apt/lists/*
 

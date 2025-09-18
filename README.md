@@ -12,15 +12,11 @@ Replace `login` with your 42 login everywhere (e.g., volumes path `/home/login/d
 - [ ] Ensure each service image name matches its service name
 - [ ] Avoid the `latest` tag everywhere
 - [ ] Set `restart` policy for all containers (e.g., `always` or `unless-stopped`)
-- [ ] Add meaningful `HEALTHCHECK`s where practical
-- [ ] Use environment variables and `.env` file; keep passwords out of Dockerfiles
-- [ ] Use Docker secrets (or Compose secrets) for confidential values
-- [ ] Ensure no infinite loops or `tail -f`, `sleep`, `bash`-as-PID1, or `while true`
 - [ ] Verify proper PID 1 handling in each container (use native daemons or correct foreground mode)
 - [ ] Add .env to .gitignore and changes the value before finishing the project
+- [ ] use mkcert to trust local CA before correction
 
 ### Service: NGINX (sole entry point on 443 with TLSv1.2/1.3)
-- [ ] Create `srcs/requirements/nginx/Dockerfile` (Alpine/Debian penultimate stable)
 - [ ] Install NGINX and required TLS dependencies (OpenSSL, etc.)
 - [ ] Add `nginx` config to serve as reverse proxy to WordPress php-fpm via fastcgi/upstream (no plain HTTP exposure)
 - [ ] Enforce TLS only on port 443; do not expose port 80 on the host
