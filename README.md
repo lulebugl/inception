@@ -1,5 +1,12 @@
 ## Inception
 
+## Dozzle (container logs viewer)
+
+- URL: http://localhost:9999
+- Purpose: Real-time viewing of Docker container logs for debugging.
+- Notes:
+  - Uses read-only mount of `/var/run/docker.sock`.
+
 A Docker-Compose based mini-infrastructure with three services: NGINX (TLS-only), WordPress (php-fpm only), and MariaDB (DB only). All services run in separate containers built from your own Dockerfiles, using Alpine or Debian (penultimate stable versions). No ready-made images (besides base OS) and no hacky infinite-loop entrypoints.
 
 Replace `login` with your 42 login everywhere (e.g., volumes path `/home/login/data`, domain `login.42.fr`).

@@ -36,7 +36,6 @@ install_docker() {
     sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   fi
 
-  # Add current user to docker group so docker can run without sudo (take effect next login)
   target_user="${SUDO_USER:-$USER}"
   if getent group docker >/dev/null 2>&1; then
     sudo usermod -aG docker "$target_user" 2>/dev/null || true
