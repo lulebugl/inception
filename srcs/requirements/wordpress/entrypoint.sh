@@ -70,5 +70,5 @@ fi
 
 install -d -m 755 -o www-data -g www-data /run/php
 echo "[wordpress] Starting php-fpm8.2"
-exec php-fpm8.2 -F
+exec "$@"
 
