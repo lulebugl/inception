@@ -22,20 +22,6 @@ services:
       retries: 12
     networks:
       - inception
-  dozzle:
-    build:
-      context: ./requirements/bonus/dozzle
-    image: dozzle:local
-    container_name: dozzle
-    restart: always
-    environment:
-      - DOZZLE_BASE=/dozzle
-    ports:
-      - "9999:8080"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - inception
   mariadb:
     build:
       context: ./requirements/mariadb
@@ -57,7 +43,6 @@ services:
       retries: 12
     networks:
       - inception
-
   wordpress:
     build:
       context: ./requirements/wordpress
@@ -87,6 +72,28 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
+    networks:
+      - inception
+  dozzle:
+    build:
+      context: ./requirements/bonus/dozzle
+    image: dozzle:local
+    container_name: dozzle
+    restart: always
+    ports:
+      - "9999:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - inception
+  adminer:
+    build:
+      context: ./requirements/bonus/adminer
+    image: adminer:local
+    container_name: adminer
+    restart: always
+    ports:
+      - "8081:8080"
     networks:
       - inception
 

@@ -6,6 +6,7 @@ set -euo pipefail
 #   DOMAIN=login.42.fr VM_IP=192.168.56.10 bash scripts/update-hosts.sh
 
 DOMAIN="llebugle.42.fr"
+DOZZLE_DOMAIN="dozzle.${DOMAIN}"
 VM_IP="${VM_IP:-}"
 
 if [[ -z "$DOMAIN" || -z "$VM_IP" ]]; then
@@ -16,6 +17,7 @@ fi
 tmp=$(mktemp)
 grep -vE "\s${DOMAIN}$" /etc/hosts > "$tmp" || true
 echo "${VM_IP} ${DOMAIN}" >> "$tmp"
+echo "${VM_IP} ${DOZZLE_DOMAIN}" >> "$tmp"
 sudo mv "$tmp" /etc/hosts
 echo "[update-hosts] Mapped ${DOMAIN} -> ${VM_IP}"
 

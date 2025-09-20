@@ -48,7 +48,8 @@ create_data_dirs() {
   sudo chown -R "${SUDO_USER:-$USER}":"${SUDO_USER:-$USER}" "$DATA_ROOT"
 }
 
-ensure_dev_cert() {
+generate_cert() {
+  local DOMAIN=$1
   local crt="${DATA_ROOT}/certs/${DOMAIN}.crt"
   local key="${DATA_ROOT}/certs/${DOMAIN}.key"
   if [[ -f "$crt" && -f "$key" ]]; then
@@ -61,6 +62,11 @@ ensure_dev_cert() {
     -keyout "$key" \
     -out "$crt" \
     -subj "/CN=${DOMAIN}" >/dev/null 2>&1
+}
+
+ensure_dev_cert() {
+  generate_cert ${DOMAIN}
+  generate_cert dozzle.${DOMAIN}
 }
 
 ensure_packages
