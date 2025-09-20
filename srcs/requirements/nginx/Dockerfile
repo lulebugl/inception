@@ -4,7 +4,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-       ca-certificates curl nginx openssl gettext-base \
+       ca-certificates \
+	   curl \
+	   nginx \
+	   openssl \
+	   gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /var/cache/nginx /etc/nginx/conf.d /etc/nginx/templates

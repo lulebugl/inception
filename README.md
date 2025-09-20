@@ -15,24 +15,20 @@ Replace `login` with your 42 login everywhere (e.g., volumes path `/home/login/d
 * create config file for php-fpm and wordpress
 
 ## Global TODO
-- [ ] Create a dedicated Docker network in `docker-compose.yml` (no host network, no links)
 - [ ] Ensure each service image name matches its service name
-- [ ] Avoid the `latest` tag everywhere
-- [ ] Set `restart` policy for all containers (e.g., `always` or `unless-stopped`)
-- [ ] Verify proper PID 1 handling in each container (use native daemons or correct foreground mode)
 - [ ] Add .env to .gitignore and changes the value before finishing the project
 - [ ] use mkcert to trust local CA before correction
 
 ### Service: NGINX (sole entry point on 443 with TLSv1.2/1.3)
-- [ ] Install NGINX and required TLS dependencies (OpenSSL, etc.)
-- [ ] Add `nginx` config to serve as reverse proxy to WordPress php-fpm via fastcgi/upstream (no plain HTTP exposure)
-- [ ] Enforce TLS only on port 443; do not expose port 80 on the host
-- [ ] Limit protocols to TLSv1.2 and TLSv1.3 only
-- [ ] Use strong ciphers and modern security headers
+- [x] Install NGINX and required TLS dependencies (OpenSSL, etc.)
+- [x] Add `nginx` config to serve as reverse proxy to WordPress php-fpm via fastcgi/upstream (no plain HTTP exposure)
+- [x] Enforce TLS only on port 443; do not expose port 80 on the host
+- [x] Limit protocols to TLSv1.3 only
+- [x] Use strong ciphers and modern security headers
 - [ ] Mount TLS certificate and key (from generated certs) into the container
 - [ ] Configure upstream to WordPress php-fpm on the internal Docker network
 - [ ] Expose only `443` in Compose; do not expose other ports
-- [ ] Add `healthcheck` (e.g., `curl -k https://localhost/`)
+- [x] Add `healthcheck` (e.g., `curl -k https://localhost/`)
 
 ### Service: WordPress (php-fpm only, no nginx)
 - [ ] Create `srcs/requirements/wordpress/Dockerfile` (Alpine/Debian penultimate stable)
@@ -113,25 +109,16 @@ Tip: Start by making the DB healthy, then bring up php-fpm with a working `wp-co
 ## Evaluation/Verification Checklist
 
 ### Simple setup
-- [ ] NGINX accessible only via port 443; `https://login.42.fr` loads; `http://login.42.fr` inaccessible
-- [ ] SSL/TLS certificate in use (self-signed OK); TLS v1.2/v1.3 enabled
-- [ ] WordPress installed and configured (no installation page visible)
+- [x] SSL/TLS certificate in use (self-signed OK); TLS v1.2/v1.3 enabled
+- [x] WordPress installed and configured (no installation page visible)
 
 ### Docker basics
 - [ ] Each image uses penultimate stable `alpine:X.Y` or `debian:version`
 - [ ] Image name matches its service name
-- [ ] Makefile builds and starts all services via docker compose without crashes
 
 ### Docker network
-- [ ] `docker-compose.yml` defines a custom user-defined network
-- [ ] `docker network ls` shows the network
+- [x] `docker network ls` shows the network
 - [ ] Able to explain the network wiring (NGINX ↔ WordPress ↔ MariaDB)
-
-### NGINX with SSL/TLS
-- [ ] Container exists (`docker compose ps`)
-- [ ] Port 80 not exposed to host; HTTP attempts fail
-- [ ] `https://login.42.fr/` serves the configured WordPress site
-- [ ] TLS v1.2/v1.3 demonstrated (browser or `openssl s_client`)
 
 ### WordPress with php-fpm and its volume
 - [ ] Container exists (`docker compose ps`); Dockerfile contains no NGINX
@@ -142,12 +129,33 @@ Tip: Start by making the DB healthy, then bring up php-fpm with a working `wp-co
 
 ### MariaDB and its volume
 - [x] Container exists (`docker compose ps`); Dockerfile contains no NGINX
-- [ ] DB volume mapped under `/home/login/data/mariadb`
-- [ ] Able to explain and perform DB login; database not empty (WP tables exist)
+- [x] DB volume mapped under `/home/login/data/mariadb`
+- [x] Able to explain and perform DB login; database not empty (WP tables exist)
 
 ### Persistence
-- [ ] After VM reboot and `docker compose up`, WordPress and MariaDB remain configured
-- [ ] Prior content and changes persist (comments, edited pages)
+- [x] After VM reboot and `docker compose up`, WordPress and MariaDB remain configured
+- [x] Prior content and changes persist (comments, edited pages)
+
+### Useful commands
+
+```bash
+# Verify TLS protocols
+openssl s_client -connect login.42.fr:443 -tls1_2 | head -n 20
+openssl s_client -connect login.42.fr:443 -tls1_3 | head -n 20
+
+curl -vkI https://login.42.fr
+curl -v http://login.42.fr  # should fail
+
+# Network / volumes
+docker volume ls
+docker volume inspect <volume-name>
+
+# to debug container
+docker compose -f srcs/docker-compose.yml run --rm --no-deps --entrypoint bash service
+
+# check redis status
+docker exec -it wordpress wp redis status --allow-root
+```
 
 ## Documentation
 
@@ -177,27 +185,3 @@ Tip: Start by making the DB healthy, then bring up php-fpm with a working `wp-co
 
 ### TLS tools and local certs
 - [mkcert](https://github.com/FiloSottile/mkcert)
-
-### Useful commands
-
-```bash
-# Verify TLS protocols
-openssl s_client -connect login.42.fr:443 -tls1_2 | head -n 20
-openssl s_client -connect login.42.fr:443 -tls1_3 | head -n 20
-
-# Check endpoints
-curl -vkI https://login.42.fr
-curl -v http://login.42.fr  # should fail
-
-# Compose / containers
-docker compose ps
-docker compose logs -f | cat
-
-# Network / volumes
-docker network ls
-docker volume ls
-docker volume inspect <volume-name>
-
-# to debug container
-docker compose -f srcs/docker-compose.yml run --rm --no-deps --entrypoint bash service
-```

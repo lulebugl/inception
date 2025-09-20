@@ -13,15 +13,14 @@ services:
     environment:
       - DOMAIN=${DOMAIN_NAME}
     volumes:
-      - wordpress_data:/var/www/html:ro
+      - wordpress:/var/www/html:ro
       - /home/${LOGIN}/data/certs:/etc/nginx/certs:ro
     healthcheck:
       test: ["CMD-SHELL", "curl -kfsS https://127.0.0.1 -I || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 12
-    networks:
-      - inception
+    networks: [inception]
   mariadb:
     build:
       context: ./requirements/mariadb
@@ -35,14 +34,13 @@ services:
       - db_password
       - db_root_password
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - mariadb:/var/lib/mysql
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin --protocol=socket --socket=/run/mysqld/mysqld.sock -uroot -p$$(tr -d '\\r\\n' </run/secrets/db_root_password) ping"]
       interval: 10s
       timeout: 5s
       retries: 12
-    networks:
-      - inception
+    networks: [inception]
   wordpress:
     build:
       context: ./requirements/wordpress
@@ -66,14 +64,26 @@ services:
       - db_password
       - wp_admin_password
     volumes:
-      - wordpress_data:/var/www/html
+      - wordpress:/var/www/html
     healthcheck:
       test: ["CMD-SHELL", "SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000 | grep -q pong"]
       interval: 10s
       timeout: 5s
       retries: 12
-    networks:
-      - inception
+    networks: [inception]
+  redis:
+    build: ./requirements/bonus/redis
+    image: redis:local
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [inception]
   dozzle:
     build:
       context: ./requirements/bonus/dozzle
@@ -84,8 +94,12 @@ services:
       - "9999:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - inception
+    networks: [inception]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
   adminer:
     build:
       context: ./requirements/bonus/adminer
@@ -94,18 +108,25 @@ services:
     restart: always
     ports:
       - "8081:8080"
-    networks:
-      - inception
+    networks: [inception]
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
 volumes:
-  wordpress_data:
+  wordpress:
     name: wordpress
     driver: local
     driver_opts:
       type: none
       o: bind
       device: /home/${LOGIN}/data/wordpress
-  mariadb_data:
+  mariadb:
     name: mariadb
     driver: local
     driver_opts:

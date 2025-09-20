@@ -18,6 +18,9 @@ if [[ -z "${MARIADB_ROOT_PASSWORD}" || -z "${MARIADB_PASSWORD}" ]]; then
   exit 1
 fi
 
+chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
+chmod 775 /var/run/mysqld
+
 # Initialization
 if [[ ! -d "/var/lib/mysql/mysql" ]]; then
   echo "[mariadb] Initializing database directory..."

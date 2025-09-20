@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-
 read_secret() { tr -d '\r\n' < "$1" 2>/dev/null || true; }
 
 DB_PASS="$(read_secret /run/secrets/db_password)"
@@ -22,13 +21,13 @@ fi
 if [[ ! -f wp-config.php ]]; then
   echo "[wordpress] Downloading WordPress..."
   wp core download --allow-root
-  cp -f wp-config-sample.php wp-config.php
-  sed -i "s/database_name_here/${MARIADB_DATABASE}/" wp-config.php
-  sed -i "s/username_here/${MARIADB_USER}/" wp-config.php
-  sed -i "s/password_here/${DB_PASS}/" wp-config.php
-  sed -i "s/localhost/mariadb/" wp-config.php
-  wp config shuffle-salts --allow-root
+  rm wp-config.php
 fi
+
+cp /usr/src/wp-config.php wp-config.php
+sed -i "s/database_name_here/${MARIADB_DATABASE}/" wp-config.php
+sed -i "s/username_here/${MARIADB_USER}/" wp-config.php
+sed -i "s/password_here/${DB_PASS}/" wp-config.php
 
 echo "[wordpress] Waiting for database..."
 for _ in {1..60}; do
@@ -38,7 +37,6 @@ for _ in {1..60}; do
   sleep 1
 done
 
-# Install site if not installed
 if ! wp core is-installed --allow-root >/dev/null 2>&1; then
   echo "[wordpress] Installing site..."
   if [[ "${WP_ADMIN_USER}" =~ [Aa]dmin|[Aa]dministrator ]]; then
@@ -79,6 +77,11 @@ if ! wp theme is-installed $WP_THEME --allow-root >/dev/null 2>&1; then
 else
   echo "[wordpress] Activating theme..."
   wp theme activate $WP_THEME --allow-root
+fi
+
+if ! wp plugin is-installed redis-cache --allow-root >/dev/null 2>&1; then
+  wp plugin install redis-cache --activate --allow-root
+  wp redis enable --force --allow-root
 fi
 
 install -d -m 755 -o www-data -g www-data /run/php
