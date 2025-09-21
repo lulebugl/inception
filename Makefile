@@ -4,7 +4,7 @@ ps:
 down:
 	@docker compose -f srcs/docker-compose.yml down $(service)
 up:
-	@docker compose -f srcs/docker-compose.yml up $(service) -d
+	@docker compose -f srcs/docker-compose.yml up -d --build $(service) 
 build:
 	@docker compose -f srcs/docker-compose.yml build $(service)
 rebuild: build up

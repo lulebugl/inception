@@ -7,7 +7,6 @@ PASV_ADDRESS="${PASV_ADDRESS:-127.0.0.1}"
 PASV_MIN_PORT="${PASV_MIN_PORT:-21100}"
 PASV_MAX_PORT="${PASV_MAX_PORT:-21110}"
 
-
 if ! id -u "${FTP_USER}" >/dev/null 2>&1; then
   # Create group and user with UID/GID 33 (www-data standard) if not present
   addgroup --gid 33 www-data || true
@@ -47,9 +46,9 @@ sed -i '/^pasv_\(min_port\|max_port\|address\|addr_resolve\)=/d' /etc/vsftpd.con
 } >> /etc/vsftpd.conf
 
 install -d -m 755 -o root -g root /var/log
-: > /var/log/xferlog
-chmod 644 /var/log/xferlog
+: > /var/log/vsftpd.log
+chmod 644 /var/log/vsftpd.log
 # stream to docker logs
-tail -F /var/log/xferlog &
+ln -sf /dev/stdout /var/log/vsftpd.log
 
 exec /usr/sbin/vsftpd -obackground=NO /etc/vsftpd.conf

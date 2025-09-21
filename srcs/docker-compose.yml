@@ -76,6 +76,7 @@ services:
       context: ./requirements/bonus/ftp
     image: ftp:local
     container_name: ftp
+    init: true
     restart: always
     ports:
       - "21:21"
