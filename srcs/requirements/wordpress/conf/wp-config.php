@@ -69,8 +69,6 @@ define('WP_HOME', getenv('WP_URL') ?: 'https://llebugle.42.fr');
 define('WP_SITEURL', getenv('WP_URL') ?: 'https://llebugle.42.fr');
 define('FORCE_SSL_ADMIN', true);
 
-define('WP_DEBUG', false);
-
 define('WP_CACHE', true);
 define('WP_REDIS_HOST', 'redis');
 define('WP_REDIS_PORT', 6379);
@@ -108,8 +106,6 @@ define('FTP_LOG_DIR', '/wp-content/logs/');
 define( 'WP_DEBUG', false );
 
 /* Add any custom values between this line and the "stop editing" line. */
-
-
 
 /* That's all, stop editing! Happy publishing. */
 
