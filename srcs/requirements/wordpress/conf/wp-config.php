@@ -76,6 +76,23 @@ define('WP_REDIS_HOST', 'redis');
 define('WP_REDIS_PORT', 6379);
 define('WP_REDIS_DATABASE', 0);
 
+// for direct upload
+// define('FS_METHOD', 'direct');
+
+// for upload via ftp
+define('FTP_BASE_DIR', '/');
+define('FTP_USER', 'www-data');
+define('FTP_HOST', 'ftp');
+define('FTP_PORT', 21);
+define('FTP_SSL', false);
+define('FTP_CONTENT_DIR', '/wp-content/');
+define('FTP_PLUGIN_DIR', '/wp-content/plugins/');
+define('FTP_THEME_DIR', '/wp-content/themes/');
+define('FTP_UPLOAD_DIR', '/wp-content/uploads/');
+define('FTP_BACKUP_DIR', '/wp-content/backups/');
+define('FTP_TEMP_DIR', '/wp-content/temp/');
+define('FTP_LOG_DIR', '/wp-content/logs/');
+
 /**
  * For developers: WordPress debugging mode.
  *
@@ -88,7 +105,7 @@ define('WP_REDIS_DATABASE', 0);
  *
  * @link https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/
  */
-define( 'WP_DEBUG', true );
+define( 'WP_DEBUG', false );
 
 /* Add any custom values between this line and the "stop editing" line. */
 

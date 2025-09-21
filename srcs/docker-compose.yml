@@ -59,10 +59,10 @@ services:
       - WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL}
       - WP_USER=${WP_USER}
       - WP_USER_EMAIL=${WP_USER_EMAIL}
-      - WP_USER_PASSWORD=${WP_USER_PWD}
     secrets:
       - db_password
       - wp_admin_password
+      - wp_user_password
     volumes:
       - wordpress:/var/www/html
     healthcheck:
@@ -71,6 +71,26 @@ services:
       timeout: 5s
       retries: 12
     networks: [inception]
+  ftp:
+    build:
+      context: ./requirements/bonus/ftp
+    image: ftp:local
+    container_name: ftp
+    restart: always
+    ports:
+      - "21:21"
+      - "21100-21110:21100-21110"
+    networks: [inception]
+    depends_on:
+      wordpress:
+        condition: service_healthy
+    environment:
+      - FTP_USER=www-data
+      - PASV_ADDRESS=ftp
+    secrets:
+      - ftp_password
+    volumes:
+      - wordpress:/var/www/html
   redis:
     build: ./requirements/bonus/redis
     image: redis:local
@@ -141,6 +161,10 @@ secrets:
     file: ../secrets/db_root_password.txt
   wp_admin_password:
     file: ../secrets/wp_admin_password.txt
+  wp_user_password:
+    file: ../secrets/wp_user_password.txt
+  ftp_password:
+    file: ../secrets/ftp_password.txt
 
 networks:
   inception:

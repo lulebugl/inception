@@ -9,19 +9,15 @@ if [[ -z "$DB_PASS" ]]; then
   exit 1
 fi
 
-mkdir -p /var/www/html
-cd /var/www/html
-
 if ! command -v wp >/dev/null 2>&1; then
   curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /usr/local/bin/wp
   chmod +x /usr/local/bin/wp
 fi
 
 
-if [[ ! -f wp-config.php ]]; then
+if [[ ! -e wp-includes/version.php ]]; then
   echo "[wordpress] Downloading WordPress..."
   wp core download --allow-root
-  rm wp-config.php
 fi
 
 cp /usr/src/wp-config.php wp-config.php
@@ -61,9 +57,12 @@ if ! wp core is-installed --allow-root >/dev/null 2>&1; then
   # Create a regular user if requested, else create a default author
   : "${WP_USER:=author}"
   : "${WP_USER_EMAIL:=author@example.com}"
-  : "${WP_USER_PASSWORD:=}"
   if ! wp user get "$WP_USER" --field=ID --allow-root >/dev/null 2>&1; then
-    if [[ -z "$WP_USER_PASSWORD" ]]; then WP_USER_PASSWORD=$(openssl rand -hex 12); fi
+  	WP_USER_PASSWORD=$(read_secret /run/secrets/wp_user_password)
+  	if [[ -z "$WP_USER_PASSWORD" ]]; then
+   		echo "[wordpress] user password missing in /run/secrets/wp_user_password" >&2
+   		exit 1
+   	fi
     wp user create "$WP_USER" "$WP_USER_EMAIL" --user_pass="$WP_USER_PASSWORD" --role=author --allow-root
   fi
 fi
@@ -84,7 +83,11 @@ if ! wp plugin is-installed redis-cache --allow-root >/dev/null 2>&1; then
   wp redis enable --force --allow-root
 fi
 
-install -d -m 755 -o www-data -g www-data /run/php
+install -d -m 755 -o www-data -g www-data /run/php /var/www/html \
+ /var/www/html/wp-content/{uploads,upgrade,plugins,themes,backups,temp,logs}
+chown -R www-data:www-data /var/www/html/wp-content
+find /var/www/html/wp-content -type d -exec chmod 2775 {} +
+
 echo "[wordpress] Starting php-fpm8.2"
 exec "$@"
 

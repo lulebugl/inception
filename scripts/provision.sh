@@ -74,5 +74,10 @@ install_docker
 create_data_dirs
 ensure_dev_cert
 
+# ohmyzsh
+export RUNZSH=no
+export KEEP_ZSHRC=yes
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended || true
+
 echo "[provision] Done."
 
