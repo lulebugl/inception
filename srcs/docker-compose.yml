@@ -14,7 +14,6 @@ services:
       - DOMAIN=${DOMAIN_NAME}
     volumes:
       - wordpress:/var/www/html:ro
-      - portfolio:/var/www/portfolio:ro
       - /home/${LOGIN}/data/certs:/etc/nginx/certs:ro
     healthcheck:
       test: ["CMD-SHELL", "curl -kfsS https://127.0.0.1 -I || exit 1"]
@@ -139,6 +138,15 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
+  portfolio:
+    build:
+      context: ./requirements/bonus/portfolio
+    image: portfolio:local
+    container_name: portfolio
+    restart: always
+    networks: [inception]
+    volumes:
+      - ./requirements/bonus/portfolio/static:/usr/share/portfolio:rw
 
 volumes:
   wordpress:
@@ -155,13 +163,6 @@ volumes:
       type: none
       o: bind
       device: /home/${LOGIN}/data/mariadb
-  portfolio:
-    name: portfolio
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./requirements/bonus/portfolio
 
 secrets:
   db_password:
