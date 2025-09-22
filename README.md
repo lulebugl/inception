@@ -18,7 +18,8 @@ Replace `login` with your 42 login everywhere (e.g., volumes path `/home/login/d
 - [ ] Ensure each service image name matches its service name
 - [ ] Add .env to .gitignore and changes the value before finishing the project
 - [ ] use mkcert to trust local CA before correction
-- [ ] add wp_user pwd to a secret
+- [ ] Add Minishell image to git 
+
 ### Service: NGINX (sole entry point on 443 with TLSv1.2/1.3)
 - [x] Install NGINX and required TLS dependencies (OpenSSL, etc.)
 - [x] Add `nginx` config to serve as reverse proxy to WordPress php-fpm via fastcgi/upstream (no plain HTTP exposure)

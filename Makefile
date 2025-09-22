@@ -19,8 +19,11 @@ re:
 
 logs: 
 	@docker compose -f srcs/docker-compose.yml logs $(service) | tail -n 100
-enter:
+
+debug:
 	@docker compose -f srcs/docker-compose.yml run --rm --no-deps --entrypoint bash $(service)
+enter:
+	@docker compose -f srcs/docker-compose.yml exec $(service) bash
 #utils
 provision:
 	bash scripts/provision.sh

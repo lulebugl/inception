@@ -67,6 +67,7 @@ generate_cert() {
 ensure_dev_cert() {
   generate_cert ${DOMAIN}
   generate_cert dozzle.${DOMAIN}
+  generate_cert llebugle.42.me
 }
 
 ensure_packages
@@ -78,6 +79,13 @@ ensure_dev_cert
 export RUNZSH=no
 export KEEP_ZSHRC=yes
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended || true
+
+mkdir -p secrets
+touch secrets/db_password.txt
+touch secrets/db_root_password.txt
+touch secrets/wp_admin_password.txt
+touch secrets/wp_user_password.txt
+touch secrets/ftp_password.txt
 
 echo "[provision] Done."
 
