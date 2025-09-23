@@ -14,7 +14,7 @@ echo "[provision] LOGIN=${LOGIN} DOMAIN=${DOMAIN} DATA_ROOT=${DATA_ROOT}"
 ensure_packages() {
   if command -v apt-get >/dev/null 2>&1; then
     sudo apt-get update -y
-    sudo apt-get install -y ca-certificates curl gnupg lsb-release openssl make vim git
+    sudo apt-get install -y ca-certificates curl gnupg lsb-release openssl make vim git zsh
   fi
 }
 
