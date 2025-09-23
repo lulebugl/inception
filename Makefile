@@ -1,4 +1,6 @@
 #docker compose
+run:
+	make up
 ps:
 	@docker compose -f srcs/docker-compose.yml ps $(service)
 down:
@@ -7,7 +9,6 @@ up:
 	@docker compose -f srcs/docker-compose.yml up -d --build $(service) 
 build:
 	@docker compose -f srcs/docker-compose.yml build $(service)
-rebuild: build up
 restart:
 	@docker compose -f srcs/docker-compose.yml restart $(service)
 clean:
@@ -24,6 +25,7 @@ debug:
 	@docker compose -f srcs/docker-compose.yml run --rm --no-deps --entrypoint bash $(service)
 enter:
 	@docker compose -f srcs/docker-compose.yml exec $(service) bash
+
 #utils
 provision:
 	bash scripts/provision.sh
