@@ -2,14 +2,6 @@
 
 A Docker-Compose based mini-infrastructure with three services: NGINX (TLS-only), WordPress (php-fpm only), and MariaDB (DB only). All services run in separate containers built from your own Dockerfiles, using Alpine or Debian (penultimate stable versions). No ready-made images (besides base OS) and no hacky infinite-loop entrypoints.
 
-Replace `login` with your 42 login everywhere (e.g., volumes path `/home/login/data`, domain `login.42.fr`).
-
-## Last
-- [ ] should i make everything go through https with reverse proxy?
-      not exposing additional ports
-- [ ] do i forget about mkcerts?
-- [?] Can add a comment with a regular WP user (check correction again)
-
 ### Useful commands
 
 ```bash
@@ -18,7 +10,6 @@ openssl s_client -connect login.42.fr:443 -tls1_2 | head -n 20
 openssl s_client -connect login.42.fr:443 -tls1_3 | head -n 20
 
 curl -vkI https://login.42.fr
-curl -v http://login.42.fr  # should fail
 
 # Network / volumes
 docker volume ls
@@ -61,6 +52,3 @@ curl -v --ftp-pasv --user "www-data:$PASS" -T /tmp/ftp-demo.txt \
 - [Initialize data directory](https://mariadb.com/kb/en/mysql_install_db/)
 - [mysqld options](https://mariadb.com/kb/en/mysqld-options/)
 - [GRANT privileges](https://mariadb.com/kb/en/grant/)
-
-### TLS tools and local certs
-- [mkcert](https://github.com/FiloSottile/mkcert)
