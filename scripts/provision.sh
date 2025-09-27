@@ -67,6 +67,7 @@ generate_cert() {
 ensure_dev_cert() {
   generate_cert ${DOMAIN}
   generate_cert dozzle.${DOMAIN}
+  generate_cert adminer.${DOMAIN}
   generate_cert llebugle.42.me
 }
 
