@@ -1,6 +1,6 @@
 ## Inception
 
-A Docker-Compose based mini-infrastructure with three services: NGINX (TLS-only), WordPress (php-fpm only), and MariaDB (DB only). All services run in separate containers built from your own Dockerfiles, using Alpine or Debian (penultimate stable versions). No ready-made images (besides base OS) and no hacky infinite-loop entrypoints.
+A Docker-Compose based mini-infrastructure with services: NGINX , WordPress, MariaDB, Dozzle, Adminer, Redis Cache, FTP and a portfolio. All services run in separate containers built from Debian.
 
 ### Useful commands
 
@@ -10,10 +10,6 @@ openssl s_client -connect login.42.fr:443 -tls1_2 | head -n 20
 openssl s_client -connect login.42.fr:443 -tls1_3 | head -n 20
 
 curl -vkI https://login.42.fr
-
-# Network / volumes
-docker volume ls
-docker volume inspect <volume-name>
 
 # to debug container
 docker compose -f srcs/docker-compose.yml run --rm --no-deps --entrypoint bash service
